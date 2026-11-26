@@ -29,6 +29,8 @@ Visual Studio'da .NET 10 destekli bir sürüm ve **.NET masaüstü geliştirme**
 3. Metni yazıp **Gönder** veya Enter’a basın. Kendi iletileriniz “Siz”, diğerleri gönderenin adı ve farklı renkle görünür. İstemci adları ve bağlantı uçları sunucuda listelenir.
 4. **Bağlantıyı kes** ile ayrılıp tekrar katılabilirsiniz. Sunucu penceresinde bağlantıyı kesmek odayı kapatır.
 
+Kendi mesajlarınız sağa, karşı tarafınkiler sola hizalanır. Katılımcı paneli sunucu penceresinde görünür. Bir mesaj gönderilirken yazılan yeni taslak korunur.
+
 ## Sınıflar ve sorumluluklar
 
 `ChatServer` bağlantıları kabul eder ve mesajları diğer istemcilere iletir. `Peer` satır tabanlı JSON paketlerini okur ve eşzamanlı yazmaları sıralar. `ChatClient` katılım, gönderme ve bağlantının kapanmasını yönetir. `MainForm` ağ olaylarını Windows arayüz iş parçacığına aktarır.
