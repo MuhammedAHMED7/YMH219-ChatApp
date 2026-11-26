@@ -69,7 +69,14 @@ public sealed class MainForm : Form
     {
         if(client is not {} session || string.IsNullOrWhiteSpace(input.Text) || !send.Enabled)return;
         send.Enabled=false;
-        try {var p=await session.Send(input.Text.Trim());if(client!=session)return;Append(p,true);input.Clear();}
+        var draft = input.Text;
+        try
+        {
+            var packet = await session.Send(draft.Trim());
+            if (client != session) return;
+            Append(packet, true);
+            if (input.Text == draft) input.Clear();
+        }
         catch(Exception ex){if(client==session)CloseSession("Mesaj gönderilemedi  ·  "+ex.Message);}
         finally {if(client==session)send.Enabled=true;}
     }
