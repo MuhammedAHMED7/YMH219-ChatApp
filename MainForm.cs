@@ -7,6 +7,7 @@ public sealed class MainForm : Form
     readonly TextBox input = new(){Dock=DockStyle.Fill,MaxLength=2000,PlaceholderText="Mesajınızı yazın…"};
     readonly RichTextBox chat = new(){Dock=DockStyle.Fill,ReadOnly=true,BackColor=Color.White,BorderStyle=BorderStyle.None};
     readonly ListBox roster = new(){Dock=DockStyle.Fill,BorderStyle=BorderStyle.None,HorizontalScrollbar=true};
+    readonly Panel participants = new() { Dock = DockStyle.Right, Width = 224, Padding = new Padding(10), BackColor = Color.White, Visible = false };
     readonly Label status=StudioUi.Status();
     readonly Button connect,serve,leave,send;
     ChatClient? client;
@@ -21,19 +22,19 @@ public sealed class MainForm : Form
         var bar=StudioUi.Bar(55);
         bar.Controls.AddRange([StudioUi.Tag("Ad"),nameBox,StudioUi.Tag("Sunucu"),host,StudioUi.Tag("Port"),port]);
         var actions=StudioUi.Bar();actions.Controls.AddRange([serve,connect,leave]);
-        var side = new Panel { Dock=DockStyle.Right, Width=224,Padding=new Padding(10),BackColor=Color.White };
-        side.Controls.Add(roster);
-        side.Controls.Add(new Label{Text="ODADAKİ İSTEMCİLER",Dock=DockStyle.Top,Height=36,ForeColor=StudioUi.Accent});
+        participants.Controls.Add(roster);
+        participants.Controls.Add(new Label{Text="ODADAKİ İSTEMCİLER",Dock=DockStyle.Top,Height=36,ForeColor=StudioUi.Accent});
         var compose=new Panel{Dock=DockStyle.Bottom,Height=54,Padding=new Padding(12,10,12,5)};
         send.Dock=DockStyle.Right; compose.Controls.Add(input); compose.Controls.Add(send);
         var body=new Panel{Dock=DockStyle.Fill,Padding=new Padding(16),BackColor=Color.White};body.Controls.Add(chat);
-        Controls.AddRange([body,side,compose,actions,bar,StudioUi.Header("Fırat Chat"),status]);
+        Controls.AddRange([body,participants,compose,actions,bar,StudioUi.Header("Fırat Chat"),status]);
         input.KeyDown+=async (_,e)=>{if(e.KeyCode==Keys.Enter){e.SuppressKeyPress=true;await Send();}};
         Idle("Çevrimdışı  ·  Bir oda açın veya sunucuya bağlanın.");
     }
     void Idle(string message)
     {
         serve.Enabled=connect.Enabled=host.Enabled=nameBox.Enabled=port.Enabled=true;
+        participants.Visible = false;
         leave.Enabled=send.Enabled=input.Enabled=false;status.Text=message;
     }
     void Ui(Action change)
@@ -60,7 +61,7 @@ public sealed class MainForm : Form
             if(session!=client)return;
             send.Enabled=input.Enabled=true; input.Focus();
             status.Text=(create?"●  Sunucu açık":"●  Bağlı")+"   ·   "+nameBox.Text+"   ·   TCP "+port.Value;
-            if(!create)roster.Items.Add("Liste sunucuda görünür.");
+            participants.Visible = create;
         }
         catch(Exception ex){if(client==session)CloseSession("Bağlanılamadı  ·  "+ex.Message);}
     }
@@ -74,10 +75,11 @@ public sealed class MainForm : Form
     }
     void Append(Packet p,bool mine)
     {
-        chat.SelectionStart=chat.TextLength;
+        chat.Select(chat.TextLength, 0);
+        chat.SelectionAlignment = mine ? HorizontalAlignment.Right : HorizontalAlignment.Left;
         chat.SelectionColor=mine?StudioUi.Accent:Color.FromArgb(108,67,144);
-        chat.AppendText($"{p.Time.ToLocalTime():HH:mm:ss}    {(mine?"Siz":p.Name)}\n");
-        chat.SelectionColor=StudioUi.Ink;chat.AppendText(p.Text+"\n\n");chat.ScrollToCaret();
+        chat.SelectedText = $"{(mine ? "Siz" : p.Name)}    {p.Time.ToLocalTime():HH:mm:ss}\n";
+        chat.SelectionColor=StudioUi.Ink;chat.SelectedText = p.Text + "\n\n";chat.ScrollToCaret();
     }
     void CloseSession(string why)
     {
